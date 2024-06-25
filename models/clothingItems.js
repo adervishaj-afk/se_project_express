@@ -10,7 +10,7 @@ const clothingItemSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  imageURL: {
+  imageUrl: {
     type: String,
     required: true,
     validate: {
@@ -19,6 +19,12 @@ const clothingItemSchema = new mongoose.Schema({
       },
       message: "You must enter a valid URL",
     },
+  },
+  likes: {
+
+  },
+  createdAt: {
+
   },
 });
 

@@ -1,13 +1,20 @@
 const User = require("../models/user");
+const errorMessages = require("../utils/errors");
 
-// GET users
+  //  GET users
 
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
     .catch((err) => {
       console.error(err);
-      return res.status(500).send({ message: err.message });
+      if (err.name === "ValidationError") {
+        return res.status(errorMessages.BAD_REQUEST).send({ message: errorMessages.ValidationError });
+      }
+      if (err.name === 'CastError') {
+        return res.status(errorMessages.NOT_FOUND).send({ message: errorMessages.CastError });
+      }
+        return res.status(errorMessages.SERVER_ERROR).send({ message: errorMessages.ServerError});
     });
 };
 
@@ -19,13 +26,12 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(404).send({ message: err.message });
-      } else if (err.name === "CastError") {
-        return res.status(400).send({ message: err.message });
+        return res.status(errorMessages.BAD_REQUEST).send({ message: errorMessages.ValidationError });
       }
-      else {
-      return res.status(500).send({ message: err.message });
-    }
+      if (err.name === 'CastError') {
+        return res.status(errorMessages.NOT_FOUND).send({ message: errorMessages.CastError });
+      }
+        return res.status(errorMessages.SERVER_ERROR).send({ message: errorMessages.ServerError});
     });
 };
 
@@ -37,13 +43,14 @@ const getUserById = (req, res) => {
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: err.message });
-      } else if (err.name === "CastError") {
-        return res.status(400).send({ message: err.message });
-      } else {
-        return res.status(500).send({ message: err.message });
+      if (err.name === "ValidationError") {
+        return res.status(errorMessages.BAD_REQUEST).send({ message: errorMessages.ValidationError });
       }
+      if (err.name === 'CastError') {
+        return res.status(errorMessages.NOT_FOUND).send({ message: errorMessages.CastError });
+      }
+        return res.status(errorMessages.SERVER_ERROR).send({ message: errorMessages.ServerError});
+
     });
 };
 
