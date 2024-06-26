@@ -5,10 +5,11 @@ const errorMessages = require("../utils/errors");
 const createItem = (req, res) => {
     //  console.log(req);
     //  console.log(req.body);
-  const { name, weather, imageURL } = req.body;
+  const { name, weather, imageUrl } = req.body;
+  const owner = req.user._id;
 
   clothingItem
-    .create({ name, weather, imageURL })
+    .create({ name, weather, imageUrl, owner })
     .then((item) => {
         //  console.error(item);
         //  console.log(req.user._id);
@@ -31,13 +32,7 @@ const getItems = (req, res) => {
     .find({})
     .then((items) => res.status(200).send(items))
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(errorMessages.BAD_REQUEST).send({ message: errorMessages.ValidationError });
-      }
-      if (err.name === 'CastError') {
-        return res.status(errorMessages.NOT_FOUND).send({ message: errorMessages.CastError });
-      }
-        return res.status(errorMessages.SERVER_ERROR).send({ message: errorMessages.ServerError});
+        res.status(errorMessages.SERVER_ERROR).send({ message: errorMessages.ServerError, err});
     });
 };
 
@@ -59,18 +54,14 @@ const deleteItem = (req, res) => {
   clothingItem
     .findByIdAndDelete(itemId)
     .orFail()
-    .then((item) => res.status(204).send({item}))
+    .then((item) => res.status(200).send({item}))
     .catch((err) => {
       //  console.error(err);
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: errorMessages.ValidationError });
-      }
-      if (err.name === 'CastError') {
-        return res.status(404).send({ message: errorMessages.CastError });
-      }
-        return res.status(errorMessages.SERVER_ERROR).send({ message: errorMessages.ServerError});
-    });
-};
+      if (err.name === "DocumentNotFoundError") {
+        res.status(errorMessages.NOT_FOUND).send({messages: errorMessages.ValidationError})
+    }
+});
 
+}
 module.exports = { createItem, getItems, /* updateItem */ deleteItem };
 
