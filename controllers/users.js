@@ -1,14 +1,16 @@
 const User = require("../models/user");
 const errorMessages = require("../utils/errors");
 
-  //  GET users
+//  GET users
 
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
     .catch((err) => {
       console.error(err);
-        return res.status(errorMessages.SERVER_ERROR).send({ message: errorMessages.ServerError});
+      return res
+        .status(errorMessages.SERVER_ERROR)
+        .send({ message: errorMessages.ServerError });
     });
 };
 
@@ -20,9 +22,13 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(errorMessages.BAD_REQUEST).send({ message: errorMessages.ValidationError });
+        return res
+          .status(errorMessages.BAD_REQUEST)
+          .send({ message: errorMessages.ValidationError });
       }
-        return res.status(errorMessages.SERVER_ERROR).send({ message: errorMessages.ServerError});
+      return res
+        .status(errorMessages.SERVER_ERROR)
+        .send({ message: errorMessages.ServerError });
     });
 };
 
@@ -34,11 +40,19 @@ const getUserById = (req, res) => {
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
-      if (err.name === 'CastError') {
-        return res.status(errorMessages.NOT_FOUND).send({ message: errorMessages.CastError });
+      if (err.name === "ValidationError") {
+        return res
+          .status(errorMessages.BAD_REQUEST)
+          .send({ message: errorMessages.ValidationError });
       }
-        return res.status(errorMessages.SERVER_ERROR).send({ message: errorMessages.ServerError});
-
+      if (err.name === "CastError") {
+        return res
+          .status(errorMessages.BAD_REQUEST)
+          .send({ message: errorMessages.CastError });
+      }
+      return res
+        .status(errorMessages.SERVER_ERROR)
+        .send({ message: errorMessages.ServerError });
     });
 };
 

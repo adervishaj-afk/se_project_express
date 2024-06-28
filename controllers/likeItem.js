@@ -19,12 +19,12 @@ const likeItem = (req, res) =>
       if (err.name === "ValidationError") {
         return res
           .status(errorMessages.BAD_REQUEST)
-          .send({ message: errorMessages.CastError });
+          .send({ message: errorMessages.ValidationError });
       }
       if (err.name === "CastError") {
         return res
-          .status(errorMessages.NOT_FOUND)
-          .send({ message: errorMessages.ValidationError });
+          .status(errorMessages.BAD_REQUEST)
+          .send({ message: errorMessages.CastError });
       }
       return res
         .status(errorMessages.SERVER_ERROR)
@@ -49,16 +49,16 @@ const dislikeItem = (req, res) =>
       if (err.name === "ValidationError") {
         return res
           .status(errorMessages.BAD_REQUEST)
-          .send({ message: errorMessages.CastError });
+          .send({ message: errorMessages.ValidationError });
       }
       if (err.name === "CastError") {
         return res
-          .status(errorMessages.NOT_FOUND)
-          .send({ message: errorMessages.ValidationError });
+          .status(errorMessages.BAD_REQUEST)
+          .send({ message: errorMessages.CastError });
       }
       return res
         .status(errorMessages.SERVER_ERROR)
         .send({ message: errorMessages.ServerError });
     });
 
-    module.exports = { likeItem, dislikeItem}
+module.exports = { likeItem, dislikeItem };
