@@ -15,7 +15,12 @@ const likeItem = (req, res) =>
       res.status(200).send({ data: item });
     })
     .catch((err) => {
-      //  console.error(err.name);
+      console.error(err.name);
+      if (err.name === "DocumentNotFoundError") {
+        return res
+          .status(errorMessages.NOT_FOUND)
+          .send({ message: errorMessages.NotFoundError });
+      }
       if (err.name === "ValidationError") {
         return res
           .status(errorMessages.BAD_REQUEST)
@@ -45,7 +50,12 @@ const dislikeItem = (req, res) =>
       res.status(200).send({ data: item });
     })
     .catch((err) => {
-      //  console.error(err.name);
+      console.error(err.name);
+      if (err.name === "DocumentNotFoundError") {
+        return res
+          .status(errorMessages.NOT_FOUND)
+          .send({ message: errorMessages.NotFoundError });
+      }
       if (err.name === "ValidationError") {
         return res
           .status(errorMessages.BAD_REQUEST)

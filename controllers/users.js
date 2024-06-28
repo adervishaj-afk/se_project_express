@@ -40,6 +40,11 @@ const getUserById = (req, res) => {
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
+      if (err.name === "DocumentNotFoundError") {
+        return res
+          .status(errorMessages.NOT_FOUND)
+          .send({ message: errorMessages.NotFoundError });
+      }
       if (err.name === "ValidationError") {
         return res
           .status(errorMessages.BAD_REQUEST)

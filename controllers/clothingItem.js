@@ -15,7 +15,12 @@ const createItem = (req, res) => {
       res.status(200).send({ data: item });
     })
     .catch((err) => {
-      //  console.error(err.name);
+      console.error(err.name);
+      if (err.name === "DocumentNotFoundError") {
+        return res
+          .status(errorMessages.NOT_FOUND)
+          .send({ message: errorMessages.NotFoundError });
+      }
       if (err.name === "ValidationError") {
         return res
           .status(errorMessages.BAD_REQUEST)
@@ -63,7 +68,12 @@ const deleteItem = (req, res) => {
     .orFail()
     .then((item) => res.status(200).send({ item }))
     .catch((err) => {
-      //  console.error(err);
+      console.error(err);
+      if (err.name === "DocumentNotFoundError") {
+        return res
+          .status(errorMessages.NOT_FOUND)
+          .send({ message: errorMessages.NotFoundError });
+      }
       if (err.name === "ValidationError") {
         return res
           .status(errorMessages.BAD_REQUEST)

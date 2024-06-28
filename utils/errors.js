@@ -6,6 +6,7 @@ module.exports = {
   SERVER_ERROR : 500,
 
   ValidationError: "Could not find data",
+  NotFoundError: "Document not found",
   CastError: "Information entered is not valid",
   ServerError: "An unexpected error occurred. Please try again later.",
 
