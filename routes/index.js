@@ -10,4 +10,5 @@ router.use((req, res) => {
   res.status(errorMessages.NOT_FOUND).send({ message: "Not found route" });
 });
 
+
 module.exports = router;

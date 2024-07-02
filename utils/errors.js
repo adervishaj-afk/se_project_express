@@ -9,6 +9,9 @@ module.exports = {
   NotFoundError: "Document not found",
   CastError: "Information entered is not valid",
   ServerError: "An unexpected error occurred. Please try again later.",
+  ExistingUser: "User with this email already exists",
+  SuccesfulAuthentication: "authentication successful! user is in the user variable",
+  AuthenticationError: "Could not authenticate the user",
 
   CreateItemError: "Error from createItem",
   GetItemsError: "Error from getItem",

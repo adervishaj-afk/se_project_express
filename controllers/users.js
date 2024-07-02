@@ -1,5 +1,22 @@
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const errorMessages = require("../utils/errors");
+const { JWT_SECRET } = require("../utils/config");
+
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" })
+      res.status(200).send({ token });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(401).send({ message: errorMessages.AuthenticationError });
+    });
+};
 
 //  GET users
 
@@ -15,12 +32,33 @@ const getUsers = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, avatar } = req.body;
+  const { name, avatar, email, password } = req.body;
 
-  User.create({ name, avatar })
+  User.findOne({ email })
+    .then((existingUser) => {
+      if (existingUser) {
+        return res
+          .status(errorMessages.BAD_REQUEST)
+          .send({ message: errorMessages.ExistingUser });
+      }
+
+      return bcrypt.hash(password, 10);
+    })
+    .then((hashedPassword) => {
+      if (!hashedPassword) {
+        throw new Error("Password hashing failed");
+      }
+
+      return User.create({ name, avatar, email, password: hashedPassword });
+    })
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
+      if (err.code === 11000) {
+        return res
+          .status(errorMessages.BAD_REQUEST)
+          .send({ message: "Duplicate email error" });
+      }
       if (err.name === "ValidationError") {
         return res
           .status(errorMessages.BAD_REQUEST)
@@ -61,4 +99,4 @@ const getUserById = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUserById };
+module.exports = { getUsers, createUser, getUserById, login };
