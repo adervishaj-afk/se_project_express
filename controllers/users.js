@@ -4,6 +4,22 @@ const User = require("../models/user");
 const errorMessages = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
+
+const getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        return res.status(errorMessages.NOT_FOUND).send({ message: errorMessages.NotFoundError });
+      }
+      return res.status(200).send(user);
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(errorMessages.SERVER_ERROR).send({ message: errorMessages.ServerError });
+    });
+};
+
+
 const login = (req, res) => {
   const { email, password } = req.body;
 
@@ -99,4 +115,4 @@ const getUserById = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUserById, login };
+module.exports = { getUsers, createUser, getUserById, login, getCurrentUser };
