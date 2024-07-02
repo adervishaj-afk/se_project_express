@@ -48,25 +48,22 @@ const getItems = (req, res) => {
     });
 };
 
-//   const updateItem = (req, res) => {
-//     const { itemId } = req.params;
-//     const { imageURL } = req.body;
-//     clothingItem
-//       .findByIdAndUpdate(itemId, { $set: { imageURL } })
-//       .orFail()
-//       .then((item) => res.status(200).send({ data: item }))
-//       .catch((err) => {
-//         console.error(err);
-//         res.status(errorMessages.SERVER_ERROR).send({ message: errorMessages.UpdateItemError });
-//       });
-//   };
-
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
+  const userId = req.user._id;
+
   clothingItem
-    .findByIdAndDelete(itemId)
+    .findById(itemId)
     .orFail()
-    .then((item) => res.status(200).send({ item }))
+    .then((item) => {
+      if (item.owner.toString() !== userId) {
+        return res
+          .status(errorMessages.PERMISSION_ERROR)
+          .send(errorMessages.PermissionsError);
+      }
+      return clothingItem.findByIdAndDelete(itemId);
+    })
+    .then((deletedItem) => res.status(200).send({ item: deletedItem }))
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
@@ -89,4 +86,4 @@ const deleteItem = (req, res) => {
         .send({ message: errorMessages.ServerError });
     });
 };
-module.exports = { createItem, getItems, /* updateItem */ deleteItem };
+module.exports = { createItem, getItems, deleteItem };

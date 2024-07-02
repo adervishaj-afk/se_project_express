@@ -16,25 +16,19 @@ mongoose
   })
   .catch(console.error);
 
-  //  middleware
-app.use((req, res, next) => {
-  req.user = {
-    _id: "66732f2754d572387524fb87", // paste the _id of the test user created in the previous step
-  };
-  next();
-});
+const cors = require("cors");
+
+app.use(cors());
 
 const routes = require("./routes");
 
 app.use(express.json());
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post("/signin", login);
+app.post("/signup", createUser);
 
 app.use(routes);
 app.use("/", mainRouter);
-
-
 
 app.listen(PORT, () => {
   //  console.log(`Server is running on port ${PORT}`);

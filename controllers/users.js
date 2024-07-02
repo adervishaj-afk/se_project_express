@@ -4,28 +4,61 @@ const User = require("../models/user");
 const errorMessages = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
+const updateUser = (req, res) => {
+  const { name, avatar } = req.body;
 
-const getCurrentUser = (req, res) => {
-  User.findById(req.user._id)
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, avatar },
+    { new: true, runValidators: true }
+  )
     .then((user) => {
       if (!user) {
-        return res.status(errorMessages.NOT_FOUND).send({ message: errorMessages.NotFoundError });
+        return res
+          .status(errorMessages.NOT_FOUND)
+          .send({ message: errorMessages.NotFoundError });
       }
       return res.status(200).send(user);
     })
     .catch((err) => {
       console.error(err);
-      return res.status(errorMessages.SERVER_ERROR).send({ message: errorMessages.ServerError });
+      if (err.name === "ValidationError") {
+        return res
+          .status(errorMessages.BAD_REQUEST)
+          .send({ message: err.message });
+      }
+      return res
+        .status(errorMessages.ServerError)
+        .send({ message: errorMessages.ServerError });
     });
 };
 
+const getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        return res
+          .status(errorMessages.NOT_FOUND)
+          .send({ message: errorMessages.NotFoundError });
+      }
+      return res.status(200).send(user);
+    })
+    .catch((err) => {
+      console.error(err);
+      return res
+        .status(errorMessages.SERVER_ERROR)
+        .send({ message: errorMessages.ServerError });
+    });
+};
 
 const login = (req, res) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" })
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
       res.status(200).send({ token });
     })
     .catch((err) => {
@@ -115,4 +148,11 @@ const getUserById = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUserById, login, getCurrentUser };
+module.exports = {
+  getUsers,
+  createUser,
+  getUserById,
+  login,
+  getCurrentUser,
+  updateUser,
+};

@@ -2,9 +2,11 @@
 
 module.exports = {
   BAD_REQUEST: 400,
+  PERMISSION_ERROR: 403,
   NOT_FOUND : 404,
   SERVER_ERROR : 500,
 
+  PermissionsError: "You do not have permission to delete this item",
   ValidationError: "Could not find data",
   NotFoundError: "Document not found",
   CastError: "Information entered is not valid",
