@@ -28,15 +28,12 @@ const userSchema = new mongoose.Schema({
       },
       message: "You must enter a valid email",
       minlength: 2,
-      maxlength: 20,
     },
-    password: {
-      type: String,
-      required: true,
-      minlength: 2,
-      maxlength: 20,
-      select: false,
-    },
+  },
+  password: {
+    type: String,
+    required: true,
+    select: false,
   },
 });
 

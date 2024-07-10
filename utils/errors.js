@@ -2,9 +2,12 @@
 
 module.exports = {
   BAD_REQUEST: 400,
+  AUTHENTICATION_ERROR : 401,
   PERMISSION_ERROR: 403,
   NOT_FOUND : 404,
   SERVER_ERROR : 500,
+  DUPLICATE_EMAIL : 409,
+
 
   PermissionsError: "You do not have permission to delete this item",
   ValidationError: "Could not find data",

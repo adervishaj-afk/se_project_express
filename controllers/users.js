@@ -63,17 +63,11 @@ const login = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      res.status(401).send({ message: errorMessages.AuthenticationError });
-    });
-};
-
-//  GET users
-
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch((err) => {
-      console.error(err);
+      if (err.message === "Incorrect email or password") {
+        return res
+          .status(errorMessages.PERMISSION_ERROR)
+          .send({ message: errorMessages.PermissionsError });
+      }
       return res
         .status(errorMessages.SERVER_ERROR)
         .send({ message: errorMessages.ServerError });
@@ -87,60 +81,27 @@ const createUser = (req, res) => {
     .then((existingUser) => {
       if (existingUser) {
         return res
-          .status(errorMessages.BAD_REQUEST)
+          .status(errorMessages.DUPLICATE_EMAIL)
           .send({ message: errorMessages.ExistingUser });
       }
 
-      return bcrypt.hash(password, 10);
-    })
-    .then((hashedPassword) => {
-      if (!hashedPassword) {
-        throw new Error("Password hashing failed");
-      }
+      return bcrypt
+        .hash(password, 10)
+        .then((hashedPassword) => {
+          if (!hashedPassword) {
+            throw new Error("Password hashing failed");
+          }
 
-      return User.create({ name, avatar, email, password: hashedPassword });
+          return User.create({ name, avatar, email });
+        })
+        .then((user) => res.status(200).send(user));
     })
-    .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
       if (err.code === 11000) {
         return res
-          .status(errorMessages.BAD_REQUEST)
-          .send({ message: "Duplicate email error" });
-      }
-      if (err.name === "ValidationError") {
-        return res
-          .status(errorMessages.BAD_REQUEST)
-          .send({ message: errorMessages.ValidationError });
-      }
-      return res
-        .status(errorMessages.SERVER_ERROR)
-        .send({ message: errorMessages.ServerError });
-    });
-};
-
-const getUserById = (req, res) => {
-  const { userId } = req.params;
-
-  User.findById(userId)
-    .orFail()
-    .then((user) => res.status(200).send(user))
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(errorMessages.NOT_FOUND)
-          .send({ message: errorMessages.NotFoundError });
-      }
-      if (err.name === "ValidationError") {
-        return res
-          .status(errorMessages.BAD_REQUEST)
-          .send({ message: errorMessages.ValidationError });
-      }
-      if (err.name === "CastError") {
-        return res
-          .status(errorMessages.BAD_REQUEST)
-          .send({ message: errorMessages.CastError });
+          .status(errorMessages.DUPLICATE_EMAIL)
+          .send({ message: errorMessages.ExistingUser });
       }
       return res
         .status(errorMessages.SERVER_ERROR)
@@ -149,9 +110,7 @@ const getUserById = (req, res) => {
 };
 
 module.exports = {
-  getUsers,
   createUser,
-  getUserById,
   login,
   getCurrentUser,
   updateUser,

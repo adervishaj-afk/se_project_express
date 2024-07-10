@@ -16,11 +16,6 @@ const createItem = (req, res) => {
     })
     .catch((err) => {
       console.error(err.name);
-      if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(errorMessages.NOT_FOUND)
-          .send({ message: errorMessages.NotFoundError });
-      }
       if (err.name === "ValidationError") {
         return res
           .status(errorMessages.BAD_REQUEST)
@@ -59,11 +54,12 @@ const deleteItem = (req, res) => {
       if (item.owner.toString() !== userId) {
         return res
           .status(errorMessages.PERMISSION_ERROR)
-          .send(errorMessages.PermissionsError);
+          .send({ message: errorMessages.PermissionsError });
       }
-      return clothingItem.findByIdAndDelete(itemId);
+      return clothingItem
+        .findByIdAndDelete(itemId)
+        .then((deletedItem) => res.status(200).send({ item: deletedItem }));
     })
-    .then((deletedItem) => res.status(200).send({ item: deletedItem }))
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
