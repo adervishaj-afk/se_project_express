@@ -37,6 +37,7 @@ const getItems = (req, res) => {
     .find({})
     .then((items) => res.status(200).send(items))
     .catch((err) => {
+      console.error(err.name);
       res
         .status(errorMessages.SERVER_ERROR)
         .send({ message: errorMessages.ServerError });
