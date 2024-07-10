@@ -65,8 +65,8 @@ const login = (req, res) => {
       console.error(err);
       if (err.message === "Incorrect email or password") {
         return res
-          .status(errorMessages.PERMISSION_ERROR)
-          .send({ message: errorMessages.PermissionsError });
+          .status(errorMessages.AUTHENTICATION_ERROR)
+          .send({ message: errorMessages.AuthenticationError });
       }
       return res
         .status(errorMessages.SERVER_ERROR)
@@ -92,12 +92,17 @@ const createUser = (req, res) => {
             throw new Error("Password hashing failed");
           }
 
-          return User.create({ name, avatar, email });
+          return User.create({ name, avatar, email, password: hashedPassword });
         })
-        .then((user) => res.status(200).send(user));
+        .then((user) => res.status(200).send({  name: user.name, avatar: user.avatar, email: user.email }));
     })
     .catch((err) => {
       console.error(err);
+      if (err.name === 'ValidationError' ) {
+        return res
+          .status(errorMessages.BAD_REQUEST)
+          .send({ message: errorMessages.ValidationError });
+  }
       if (err.code === 11000) {
         return res
           .status(errorMessages.DUPLICATE_EMAIL)

@@ -39,7 +39,7 @@ const getItems = (req, res) => {
     .catch((err) => {
       res
         .status(errorMessages.SERVER_ERROR)
-        .send({ message: errorMessages.ServerError, err });
+        .send({ message: errorMessages.ServerError });
     });
 };
 
