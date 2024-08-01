@@ -4,7 +4,7 @@ const auth = require("../middlewares/auth");
 const {
   createItem,
   getItems,
-  /* updateItem */ deleteItem,
+  deleteItem,
 } = require("../controllers/clothingItem");
 const { likeItem, dislikeItem } = require("../controllers/likeItem");
 
