@@ -1,7 +1,10 @@
 const clothingItem = require("../models/clothingItems");
-const errorMessages = require("../utils/errors");
+const errorMessages = require("../utils/errors/errors");
+const NotFoundError = require("../utils/errors/NotFoundError");
+const ForbiddenError = require("../utils/errors/ForbiddenError");
+const BadRequestError = require("../utils/errors/BadRequestError");
 
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   //  console.log(req);
   //  console.log(req.body);
   const { name, weather, imageUrl } = req.body;
@@ -10,77 +13,48 @@ const createItem = (req, res) => {
   clothingItem
     .create({ name, weather, imageUrl, owner })
     .then((item) => {
-      //  console.error(item);
-      //  console.log(req.user._id);
       res.status(200).send({ data: item });
     })
     .catch((err) => {
-      console.error(err.name);
       if (err.name === "ValidationError") {
-        return res
-          .status(errorMessages.BAD_REQUEST)
-          .send({ message: errorMessages.ValidationError });
+        next(new BadRequestError("Invalid data provided for creating an item"));
+      } else {
+        next(err);
       }
-      if (err.name === "CastError") {
-        return res
-          .status(errorMessages.BAD_REQUEST)
-          .send({ message: errorMessages.CastError });
-      }
-      return res
-        .status(errorMessages.SERVER_ERROR)
-        .send({ message: errorMessages.ServerError });
     });
 };
 
-const getItems = (req, res) => {
+const getItems = (req, res, next) => {
   clothingItem
     .find({})
     .then((items) => res.status(200).send(items))
-    .catch((err) => {
-      console.error(err.name);
-      res
-        .status(errorMessages.SERVER_ERROR)
-        .send({ message: errorMessages.ServerError });
-    });
+    .catch(next);
 };
 
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
   const userId = req.user._id;
 
   clothingItem
     .findById(itemId)
-    .orFail()
+    .orFail(() => {
+      throw new NotFoundError("No item found with the specified ID");
+    })
     .then((item) => {
       if (item.owner.toString() !== userId) {
-        return res
-          .status(errorMessages.PERMISSION_ERROR)
-          .send({ message: errorMessages.PermissionsError });
+        throw new ForbiddenError(
+          "You do not have permission to delete this item"
+        );
       }
-      return clothingItem
-        .findByIdAndDelete(itemId)
-        .then((deletedItem) => res.status(200).send({ item: deletedItem }));
+      return clothingItem.findByIdAndDelete(itemId);
     })
+    .then((deletedItem) => res.status(200).send({ item: deletedItem }))
     .catch((err) => {
-      console.error(err);
-      if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(errorMessages.NOT_FOUND)
-          .send({ message: errorMessages.NotFoundError });
-      }
-      if (err.name === "ValidationError") {
-        return res
-          .status(errorMessages.BAD_REQUEST)
-          .send({ message: errorMessages.ValidationError });
-      }
       if (err.name === "CastError") {
-        return res
-          .status(errorMessages.BAD_REQUEST)
-          .send({ message: errorMessages.CastError });
+        next(new BadRequestError("Invalid item ID format"));
+      } else {
+        next(err);
       }
-      return res
-        .status(errorMessages.SERVER_ERROR)
-        .send({ message: errorMessages.ServerError });
     });
 };
 module.exports = { createItem, getItems, deleteItem };

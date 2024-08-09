@@ -8,6 +8,8 @@ const { login, createUser } = require("./controllers/users");
 
 const mainRouter = require("./routes/index");
 
+const errorHandler = require('./middlewares/error-handler');
+
 const { PORT = 3001 } = process.env;
 const app = express();
 
@@ -29,6 +31,8 @@ app.post("/signup", createUser);
 
 app.use(routes);
 app.use("/", mainRouter);
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   //  console.log(`Server is running on port ${PORT}`);

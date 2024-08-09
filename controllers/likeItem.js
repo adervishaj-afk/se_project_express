@@ -1,74 +1,50 @@
 const clothingItem = require("../models/clothingItems");
-const errorMessages = require("../utils/errors");
+const errorMessages = require("../utils/errors/errors");
+const NotFoundError = require("../utils/errors/NotFoundError");
+const BadRequestError = require("../utils/errors/BadRequestError");
 
-const likeItem = (req, res) =>
+const likeItem = (req, res, next) => {
   clothingItem
     .findByIdAndUpdate(
       req.params.itemId,
-      { $addToSet: { likes: req.user._id } }, //  add _id to the array if it's not there yet
+      { $addToSet: { likes: req.user._id } },
       { new: true }
     )
-    .orFail()
+    .orFail(() => {
+      throw new NotFoundError("No item found with the specified ID");
+    })
     .then((item) => {
-      //  console.error(item);
-      //  console.log(req.user._id);
       res.status(200).send({ data: item });
     })
     .catch((err) => {
-      console.error(err.name);
-      if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(errorMessages.NOT_FOUND)
-          .send({ message: errorMessages.NotFoundError });
-      }
-      if (err.name === "ValidationError") {
-        return res
-          .status(errorMessages.BAD_REQUEST)
-          .send({ message: errorMessages.ValidationError });
-      }
       if (err.name === "CastError") {
-        return res
-          .status(errorMessages.BAD_REQUEST)
-          .send({ message: errorMessages.CastError });
+        next(new BadRequestError("Invalid item ID format"));
+      } else {
+        next(err);
       }
-      return res
-        .status(errorMessages.SERVER_ERROR)
-        .send({ message: errorMessages.ServerError });
     });
+};
 
-const dislikeItem = (req, res) =>
+const dislikeItem = (req, res, next) => {
   clothingItem
     .findByIdAndUpdate(
       req.params.itemId,
-      { $pull: { likes: req.user._id } }, //   remove _id from the array
+      { $pull: { likes: req.user._id } },
       { new: true }
     )
-    .orFail()
+    .orFail(() => {
+      throw new NotFoundError("No item found with the specified ID");
+    })
     .then((item) => {
-      //  console.error(item);
-      //  console.log(req.user._id);
       res.status(200).send({ data: item });
     })
     .catch((err) => {
-      console.error(err.name);
-      if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(errorMessages.NOT_FOUND)
-          .send({ message: errorMessages.NotFoundError });
-      }
-      if (err.name === "ValidationError") {
-        return res
-          .status(errorMessages.BAD_REQUEST)
-          .send({ message: errorMessages.ValidationError });
-      }
       if (err.name === "CastError") {
-        return res
-          .status(errorMessages.BAD_REQUEST)
-          .send({ message: errorMessages.CastError });
+        next(new BadRequestError("Invalid item ID format"));
+      } else {
+        next(err);
       }
-      return res
-        .status(errorMessages.SERVER_ERROR)
-        .send({ message: errorMessages.ServerError });
     });
+};
 
 module.exports = { likeItem, dislikeItem };

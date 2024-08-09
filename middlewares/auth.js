@@ -1,12 +1,14 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
-const errorMessages = require("../utils/errors");
+const errorMessages = require("../utils/errors/errors");
 
 const auth = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization) {
-    return res.status(errorMessages.AUTHENTICATION_ERROR).send({ message: errorMessages.AuthenticationError });
+    return res
+      .status(errorMessages.AUTHENTICATION_ERROR)
+      .send({ message: errorMessages.AuthenticationError });
   }
 
   const token = authorization.replace("Bearer ", "");
@@ -17,7 +19,9 @@ const auth = (req, res, next) => {
     next(); // Pass the request to the next middleware or route handler
   } catch (err) {
     console.error(err);
-    return res.status(errorMessages.AUTHENTICATION_ERROR).send({ message: errorMessages.AuthenticationError });
+    return res
+      .status(errorMessages.AUTHENTICATION_ERROR)
+      .send({ message: errorMessages.AuthenticationError });
   }
 
   return null;

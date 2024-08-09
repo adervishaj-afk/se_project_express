@@ -1,8 +1,12 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
-const errorMessages = require("../utils/errors");
+const errorMessages = require("../utils/errors/errors");
 const { JWT_SECRET } = require("../utils/config");
+const NotFoundError = require("../utils/errors/NotFoundError");
+const BadRequestError = require("../utils/errors/BadRequestError");
+const ConflictError = require("../utils/errors/ConflictError");
+const UnauthorizedError = require("../utils/errors/UnauthorizedError");
 
 const updateUser = (req, res) => {
   const { name, avatar } = req.body;
@@ -21,40 +25,29 @@ const updateUser = (req, res) => {
       return res.status(200).send(user);
     })
     .catch((err) => {
-      console.error(err);
       if (err.name === "ValidationError") {
-        return res
-          .status(errorMessages.BAD_REQUEST)
-          .send({ message: err.message });
+        next(new BadRequestError(err.message));
+      } else {
+        next(err);
       }
-      return res
-        .status(errorMessages.ServerError)
-        .send({ message: errorMessages.ServerError });
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        return res
-          .status(errorMessages.NOT_FOUND)
-          .send({ message: errorMessages.NotFoundError });
+        throw new NotFoundError("User not found");
       }
-      return res.status(200).send(user);
+      res.status(200).send(user);
     })
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(errorMessages.SERVER_ERROR)
-        .send({ message: errorMessages.ServerError });
-    });
+    .catch(next);
 };
 
 const login = (req, res) => {
   const { email, password } = req.body;
 
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
@@ -62,15 +55,11 @@ const login = (req, res) => {
       res.status(200).send({ token });
     })
     .catch((err) => {
-      console.error(err);
       if (err.message === "Incorrect email or password") {
-        return res
-          .status(errorMessages.AUTHENTICATION_ERROR)
-          .send({ message: errorMessages.AuthenticationError });
+        next(new UnauthorizedError("Incorrect email or password"));
+      } else {
+        next(err);
       }
-      return res
-        .status(errorMessages.SERVER_ERROR)
-        .send({ message: errorMessages.ServerError });
     });
 };
 
@@ -80,37 +69,30 @@ const createUser = (req, res) => {
   User.findOne({ email })
     .then((existingUser) => {
       if (existingUser) {
-        return res
-          .status(errorMessages.DUPLICATE_EMAIL)
-          .send({ message: errorMessages.ExistingUser });
+        throw new ConflictError("A user with this email already exists");
       }
 
-      return bcrypt
-        .hash(password, 10)
-        .then((hashedPassword) => {
-          if (!hashedPassword) {
-            throw new Error("Password hashing failed");
-          }
+      return bcrypt.hash(password, 10).then((hashedPassword) => {
+        if (!hashedPassword) {
+          throw new Error("Password hashing failed");
+        }
 
-          return User.create({ name, avatar, email, password: hashedPassword });
-        })
-        .then((user) => res.status(200).send({  name: user.name, avatar: user.avatar, email: user.email }));
+        return User.create({ name, avatar, email, password: hashedPassword });
+      });
     })
+    .then((user) =>
+      res
+        .status(200)
+        .send({ name: user.name, avatar: user.avatar, email: user.email })
+    )
     .catch((err) => {
-      console.error(err);
-      if (err.name === 'ValidationError' ) {
-        return res
-          .status(errorMessages.BAD_REQUEST)
-          .send({ message: errorMessages.ValidationError });
-  }
-      if (err.code === 11000) {
-        return res
-          .status(errorMessages.DUPLICATE_EMAIL)
-          .send({ message: errorMessages.ExistingUser });
+      if (err.name === "ValidationError") {
+        next(new BadRequestError("Invalid data provided"));
+      } else if (err.code === 11000 || err.name === "ConflictError") {
+        next(new ConflictError("A user with this email already exists"));
+      } else {
+        next(err);
       }
-      return res
-        .status(errorMessages.SERVER_ERROR)
-        .send({ message: errorMessages.ServerError });
     });
 };
 
