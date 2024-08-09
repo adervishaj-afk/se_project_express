@@ -1,5 +1,3 @@
-const errorMessages = require("../utils/errors/errors");
-
 function errorHandler(err, req, res, next) {
   console.error(err.stack);
 
