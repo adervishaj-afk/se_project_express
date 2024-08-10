@@ -1,3 +1,7 @@
+front end repo: https://github.com/adervishaj-afk/se_project_react
+
+backend repo: https://github.com/adervishaj-afk/se_project_express
+
 # WTWR (What to Wear?): Back End
 
 The back-end project is focused on creating a server for the WTWR application. You’ll gain a deeper understanding of how to work with databases, set up security and testing, and deploy web applications on a remote machine. The eventual goal is to create a server with an API and user authorization.
