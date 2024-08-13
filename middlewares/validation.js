@@ -13,13 +13,14 @@ const validateCreateItem = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
     imageUrl: Joi.string().custom(validateURL).required(),
+    weather: Joi.string().valid("hot", "warm", "cold").required(),
   }),
 });
 
 // Validation for creating a user
 const validateCreateUser = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
+    name: Joi.string().min(2).max(30).required(),
     avatar: Joi.string().custom(validateURL).required(),
     email: Joi.string().email().required(),
     password: Joi.string().required(),
@@ -39,9 +40,17 @@ const validateId = celebrate({
   }),
 });
 
+const validateUpdateUser = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30).required(),
+    avatar: Joi.string().custom(validateURL).required(),
+  }),
+});
+
 module.exports = {
   validateCreateItem,
   validateCreateUser,
   validateLogin,
   validateId,
+  validateUpdateUser,
 };

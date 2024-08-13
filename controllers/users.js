@@ -8,7 +8,7 @@ const BadRequestError = require("../utils/errors/BadRequestError");
 const ConflictError = require("../utils/errors/ConflictError");
 const UnauthorizedError = require("../utils/errors/UnauthorizedError");
 
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -18,9 +18,10 @@ const updateUser = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        return res
-          .status(errorMessages.NOT_FOUND)
-          .send({ message: errorMessages.NotFoundError });
+        throw new NotFoundError("User not found");
+        // return res
+        //   .status(errorMessages.NOT_FOUND)
+        //   .send({ message: errorMessages.NotFoundError });
       }
       return res.status(200).send(user);
     })
@@ -44,7 +45,7 @@ const getCurrentUser = (req, res, next) => {
     .catch(next);
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
@@ -63,7 +64,7 @@ const login = (req, res) => {
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   User.findOne({ email })
