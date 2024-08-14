@@ -86,6 +86,7 @@ const createUser = (req, res, next) => {
         .send({ name: user.name, avatar: user.avatar, email: user.email })
     )
     .catch((err) => {
+      console.log(err)
       if (err.name === "ValidationError") {
         next(new BadRequestError("Invalid data provided"));
       } else if (err.code === 11000 || err.name === "ConflictError") {
