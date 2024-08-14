@@ -25,7 +25,7 @@ const routes = require("./routes");
 
 app.use(express.json());
 
-//Enable the request logger before all route handlers:
+//  Enable the request logger before all route handlers:
 app.use(requestLogger);
 app.get("/crash-test", () => {
   setTimeout(() => {
@@ -37,7 +37,7 @@ app.post("/signin", validateLogin, login);
 app.post("/signup", validateCreateUser, createUser);
 app.use(routes);
 app.use("/", mainRouter);
-//The error logger needs to be enabled after the route handlers and before the error handlers:
+//  The error logger needs to be enabled after the route handlers and before the error handlers:
 app.use(errorLogger);
 app.use(errors());
 app.use(errorHandler);
