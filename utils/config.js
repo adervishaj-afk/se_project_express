@@ -1,5 +1,5 @@
 const { JWT_SECRET = "super-strong-secret" } = process.env;
 
 module.exports = {
-  JWT_SECRET: "0123456789",
+  JWT_SECRET,
 };

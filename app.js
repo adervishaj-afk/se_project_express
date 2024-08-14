@@ -2,13 +2,13 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const { errors } = require("celebrate");
 const { login, createUser } = require("./controllers/users");
 const mainRouter = require("./routes/index");
 const {
   validateCreateUser,
   validateLogin,
 } = require("./middlewares/validation");
-const { errors } = require("celebrate");
 const errorHandler = require("./middlewares/error-handler");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
 
@@ -22,6 +22,7 @@ mongoose
   .catch(console.error);
 app.use(cors());
 const routes = require("./routes");
+
 app.use(express.json());
 
 //Enable the request logger before all route handlers:

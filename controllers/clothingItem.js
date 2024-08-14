@@ -1,5 +1,4 @@
 const clothingItem = require("../models/clothingItems");
-const errorMessages = require("../utils/errors/errors");
 const NotFoundError = require("../utils/errors/NotFoundError");
 const ForbiddenError = require("../utils/errors/ForbiddenError");
 const BadRequestError = require("../utils/errors/BadRequestError");
